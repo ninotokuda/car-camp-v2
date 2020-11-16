@@ -1,0 +1,65 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+type Query {
+  listCompanies(): [Company]!
+  allTalents(): [Talent]!
+  talent(pk: String!, sk: String!): Talent
+  companyTalents(pk: String!): [Talent]!
+  openTalentSpots(talentId: String!, startDate: String, endDate: String): [Spot]!
+  companySpots(companyId: String!, status: String, startDate: String, endDate: String): [Spot]!
+  userSpots(userId: String!, startDate: String, endDate: String, status: String): [Spot]!
+  spot(pk: String!, sk: String!): Spot
+  user(sk: String!): User
+}
+
+
+type Mutation {
+    createTalent(name: String!, description: String!, profileImage: String): Talent!
+    updateTalent(pk: String!, sk: String!, name: String!, description: String! profileImage: String): Talent!
+    createSpot(talentId: String!, companyId: String!, date: String!, durationSeconds: Int!, priceYen: Int!, talentName: String, name: String, description: String): Spot!
+    updateSpot(pk: String!, sk: String!, durationSeconds: Int!, priceYen: Int!, name: String, description: String): Spot!
+    reserveSpot(pk: String!, sk: String!, userId: String!, userName: String): Spot!
+}
+
+
+type User {
+  PK: String! # user
+  SK: String! # user_<user_id>
+  Nickname: String
+}
+
+type Company {
+  PK: String! # company
+  SK: String! # <company_id>
+  CompanyId: String!
+  Name: String!
+  Description: String
+}
+
+type Talent {
+    PK: String! # talent#<company_id>
+    SK: String! # <talent_id>
+    Name: String!
+    Description: String
+    GSI1: String # talent
+    ProfileImageUrl: String
+}
+
+type Spot {
+  PK: String! # spot#<company_id>
+  SK: String! # <date_time>#<spot_id>
+  SpotId: String!
+  Status: String!
+  Date: String!
+  DurationSeconds: Int!
+  PriceYen: Int!
+  Name: String
+  TalentName: String
+  UserName: String
+  Description: String
+  GSI1: String # spot#<talent_id>
+  GSI2: String # spot#<user_id>
+}

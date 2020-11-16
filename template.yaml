@@ -1,0 +1,455 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  entamall
+  
+  Sample SAM Template for entamall
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 5
+
+Resources:
+  GraphQlFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: graph-ql/
+      Handler: graph-ql
+      Runtime: go1.x
+      Tracing: Active # https://docs.aws.amazon.com/lambda/latest/dg/lambda-x-ray.html
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTable
+        - S3CrudPolicy:
+            BucketName: !Ref ImagesBucket
+      Events:
+        CatchAll:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /graph-ql
+            Method: POST
+      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+        Variables:
+          DynamoTableName: !Ref DynamoDBTable
+          S3BucketName: !Ref ImagesBucket
+  
+  PostConfirmationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: post-confirmation/
+      Handler: post-confirmation
+      Runtime: go1.x
+      Tracing: Active # https://docs.aws.amazon.com/lambda/latest/dg/lambda-x-ray.html
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTable
+      Events:
+        PostConfirmationEvent:
+          Type: Cognito
+          Properties:
+            UserPool: !Ref UserPool
+            Trigger: PostConfirmation
+      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+        Variables:
+          DynamoTableName: !Ref DynamoDBTable
+
+  WSServer:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ws-server/
+      Handler: ws-server
+      Runtime: go1.x
+      Tracing: Active # https://docs.aws.amazon.com/lambda/latest/dg/lambda-x-ray.html
+      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+        Variables:
+          DynamoTableName: !Ref DynamoDBTable
+          ConnectionsTableName: !Ref ConnectionsTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ConnectionsTable
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - iam:*
+                - kinesisvideo:*
+                - sts:AssumeRole
+                - dynamodb:*
+                - apigateway:*
+                - execute-api:*
+              Resource: "*"
+  
+  WSServerPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - WSApi
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref WSServer
+      Principal: apigateway.amazonaws.com
+  
+  DynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+        - AttributeName: Date
+          AttributeType: S
+        - AttributeName: GSI1
+          AttributeType: S
+        - AttributeName: GSI2
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+      BillingMode: PAY_PER_REQUEST # for now
+      LocalSecondaryIndexes:
+        - IndexName: "PK-date-index"
+          KeySchema:
+            - AttributeName: PK
+              KeyType: HASH
+            - AttributeName: Date
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      GlobalSecondaryIndexes:
+        - IndexName: "GSI1"
+          KeySchema:
+            - AttributeName: GSI1
+              KeyType: HASH
+            - AttributeName: SK
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: "GSI2"
+          KeySchema:
+            - AttributeName: GSI2
+              KeyType: HASH
+            - AttributeName: SK
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+
+  ConnectionsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: ConnectionId
+          AttributeType: S
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: GSI2
+          AttributeType: S
+      KeySchema:
+        - AttributeName: ConnectionId
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: GSI1
+          KeySchema:
+            - AttributeName: PK
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+        - IndexName: GSI2
+          KeySchema:
+            - AttributeName: GSI2
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      BillingMode: PAY_PER_REQUEST # for now
+      
+  Api:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: dev
+      Cors: 
+        AllowMethods: "'*'"
+        AllowHeaders: "'*'"
+        AllowOrigin: "'*'"
+      Auth:
+        ApiKeyRequired: True
+      MethodSettings:
+        - LoggingLevel: INFO
+          ResourcePath: '/*' # allows for logging on any resource
+          HttpMethod: '*' # allows for logging on any method
+
+  WSApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: entamall-ws
+      Description: "entamall websocket endpoint"
+      ProtocolType: WEBSOCKET
+      RouteSelectionExpression: $request.body.action
+
+  ConnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref WSApi
+      RouteKey: $connect
+      AuthorizationType: NONE
+      OperationName: ConnectRoute
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref ConnectIntegration
+
+  ConnectIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties: 
+      ApiId: !Ref WSApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: 
+        Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${WSServer.Arn}/invocations
+
+  DisconnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref WSApi
+      RouteKey: $disconnect
+      AuthorizationType: NONE
+      OperationName: DisconnectRoute
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref DisconnectIntegration
+
+  DisconnectIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref WSApi
+      Description: Disconnect Integration
+      IntegrationType: AWS_PROXY
+      IntegrationUri: 
+        Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${WSServer.Arn}/invocations
+
+  SendRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref WSApi
+      RouteKey: sendmessage
+      AuthorizationType: NONE
+      OperationName: SendRoute
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref SendIntegration
+
+  SendIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref WSApi
+      Description: Send Integration
+      IntegrationType: AWS_PROXY
+      IntegrationUri: 
+        Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${WSServer.Arn}/invocations
+  
+  AuthenticateRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref WSApi
+      RouteKey: authenticate
+      AuthorizationType: NONE
+      OperationName: authenticateRoute
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref AuthenticateIntegration
+
+  AuthenticateIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref WSApi
+      Description: Authenticate Integration
+      IntegrationType: AWS_PROXY
+      IntegrationUri: 
+        Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${WSServer.Arn}/invocations
+
+  DefaultRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref WSApi
+      RouteKey: $default
+      AuthorizationType: NONE
+      OperationName: DefaultRoute
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref DefaultIntegration
+
+  DefaultIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref WSApi
+      Description: Default Integration
+      IntegrationType: AWS_PROXY
+      IntegrationUri: 
+        Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${WSServer.Arn}/invocations
+  
+  WSDeployment:
+    Type: AWS::ApiGatewayV2::Deployment
+    DependsOn:
+      - ConnectRoute
+      - SendRoute
+      - DisconnectRoute
+    Properties:
+      ApiId: !Ref WSApi
+
+  WSStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      StageName: prod
+      Description: Prod Stage
+      DeploymentId: !Ref WSDeployment
+      ApiId: !Ref WSApi
+      DefaultRouteSettings:
+        DetailedMetricsEnabled: true
+        LoggingLevel: INFO
+        DataTraceEnabled: false
+
+
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UsernameAttributes:
+        - email
+      AutoVerifiedAttributes:
+        - email
+      UserPoolName: EntamallUsers
+      AccountRecoverySetting:
+        RecoveryMechanisms: 
+          - Name: "verified_email"
+            Priority: 1
+      DeviceConfiguration:
+        ChallengeRequiredOnNewDevice: false
+        DeviceOnlyRememberedOnUserPrompt: false
+      VerificationMessageTemplate:
+        DefaultEmailOption: CONFIRM_WITH_LINK
+  
+  UserGroupSeller:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      Description: "Group for seller, have access to seller dashboard."
+      GroupName: "Seller"
+      Precedence: 10 # Set to 10 in case need to go lower
+      UserPoolId: !Ref UserPool
+  
+  UserGroupAdmin:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      Description: "Group for company admins, have access to admin dashboard."
+      GroupName: "Admin"
+      Precedence: 5 # Set to 5 in case need to go lower
+      UserPoolId: !Ref UserPool
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: Default
+      GenerateSecret: false
+      RefreshTokenValidity: 30
+      UserPoolId: !Ref UserPool
+      AllowedOAuthFlowsUserPoolClient: True
+      AllowedOAuthFlows:
+        - code
+        - implicit
+      AllowedOAuthScopes:
+        - email
+        - openid
+        - profile
+      CallbackURLs:
+        - http://localhost:8080/
+        - http://localhost:8080/login/oauth2/code/cognito
+        - https://entamall.com/login/oauth2/code/cognito
+      LogoutURLs:
+        - http://localhost:8080/
+        - https://entamall.com
+      SupportedIdentityProviders:
+        - COGNITO
+
+  UserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: "entamall"
+      UserPoolId: !Ref UserPool
+
+  IdentityPool:
+    Type: AWS::Cognito::IdentityPool
+    Properties:
+      AllowUnauthenticatedIdentities: true
+      CognitoIdentityProviders:
+        - ClientId: !Ref UserPoolClient
+          ProviderName:
+            Fn::GetAtt: [UserPool, ProviderName]
+      IdentityPoolName: "EntamallIdentityPool"
+
+
+  ApiKey:
+    Type: AWS::ApiGateway::ApiKey
+    Properties:
+      Name: EntamallWeb
+      Enabled: 'true'
+      StageKeys:
+        - RestApiId: !Ref Api
+          StageName: dev
+  
+  UsagePlan:
+    Type: AWS::ApiGateway::UsagePlan
+    Properties:
+      ApiStages:
+        - ApiId: !Ref Api
+          Stage: dev
+      Description: "entamall usage plan"
+      UsagePlanName: EntamallUsagePlan
+
+  UsagePlanKey:
+    Type: AWS::ApiGateway::UsagePlanKey
+    Properties:
+      KeyId: !Ref ApiKey
+      KeyType: API_KEY
+      UsagePlanId: !Ref UsagePlan
+
+  ImagesBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: entamall-images
+  
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: entamall-frontend
+
+
+
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  GraphQlApi:
+    Description: "API Gateway endpoint URL for Prod environment for First Function"
+    Value: !Sub "https://${Api}.execute-api.${AWS::Region}.amazonaws.com/dev/graph-ql/"
+  GraphQlFunction:
+    Description: "First Lambda Function ARN"
+    Value: !GetAtt GraphQlFunction.Arn
+  GraphQlFunctionRole:
+    Description: "Implicit IAM Role created for Graph ql function"
+    Value: !GetAtt GraphQlFunctionRole.Arn
+  DynamoDBTable:
+    Description: "Dynamodb table to store information"
+    Value: !Ref DynamoDBTable
+  FrontendBucket:
+    Description: "S3 bucket hosting the frontend app"
+    Value: !GetAtt FrontendBucket.WebsiteURL
+  WebSocketURI:
+    Description: "The WSS Protocol URI to connect to"
+    Value: !Join [ '', [ 'wss://', !Ref WSApi, '.execute-api.',!Ref 'AWS::Region','.amazonaws.com/',!Ref 'WSStage'] ]
+  

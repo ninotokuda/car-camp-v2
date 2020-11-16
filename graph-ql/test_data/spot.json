@@ -1,0 +1,40 @@
+{
+    "Item": {
+        "Date": {
+            "S": "2020-09-25T12:00:00"
+        },
+        "CompanyId": {
+            "S": "test_seller_id"
+        },
+        "PriceYen": {
+            "N": "123"
+        },
+        "TalentName": {
+            "S": "new 1"
+        },
+        "SpotId": {
+            "S": "spot_9799bb68-1251-4a4d-a30d-8ac8dc6e70a9"
+        },
+        "DurationSeconds": {
+            "N": "123"
+        },
+        "GSI2": {
+            "S": "spot#141a87cb-7580-4e95-b01f-832fb83642e1"
+        },
+        "SK": {
+            "S": "2020-09-25T12:00:00#spot_9799bb68-1251-4a4d-a30d-8ac8dc6e70a9"
+        },
+        "GSI1": {
+            "S": "spot#efaf31b1-56b8-47a9-b7e2-58947b3b62b3"
+        },
+        "Status": {
+            "S": "reserved"
+        },
+        "PK": {
+            "S": "spot#test_seller_id"
+        },
+        "UserName": {
+            "S": "testname"
+        }
+    }
+}

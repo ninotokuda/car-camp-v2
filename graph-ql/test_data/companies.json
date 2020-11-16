@@ -1,0 +1,35 @@
+{
+    "Items": [
+        {
+            "PK": {
+                "S": "company"
+            },
+            "SK": {
+                "S": "company_1"
+            },
+            "Name": {
+                "S": "test company 1"
+            },
+            "Description": {
+                "S": "desc"
+            }
+        },
+        {
+            "PK": {
+                "S": "company"
+            },
+            "SK": {
+                "S": "company_2"
+            },
+            "Name": {
+                "S": "test company 2"
+            },
+            "Description": {
+                "S": "desc"
+            }
+        }
+    ],
+    "Count": 2,
+    "ScannedCount": 2,
+    "ConsumedCapacity": null
+}
