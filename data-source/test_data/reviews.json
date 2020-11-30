@@ -1,0 +1,53 @@
+{
+    "Items": [
+        {
+            "CreationTime": {
+                "S": "2020-01-02"
+            },
+            "GSI2": {
+                "S": "User#user1"
+            },
+            "SK": {
+                "S": "Review#2020-01-02"
+            },
+            "GSI1": {
+                "S": "Review#review1"
+            },
+            "PK": {
+                "S": "Spot#spot1"
+            },
+            "Rating": {
+                "N": "4"
+            },
+            "Message": {
+                "S": "very good"
+            }
+        },
+        {
+            "CreationTime": {
+                "S": "2020-01-03"
+            },
+            "GSI2": {
+                "S": "User#user2"
+            },
+            "SK": {
+                "S": "Review#2020-01-03"
+            },
+            "GSI1": {
+                "S": "Review#review2"
+            },
+            "PK": {
+                "S": "Spot#spot1"
+            },
+            "Rating": {
+                "N": "5"
+            },
+            "Message": {
+                "S": "very good yay"
+            }
+        }
+    ],
+    "Count": 2,
+    "ScannedCount": 2,
+    "ConsumedCapacity": null  
+}

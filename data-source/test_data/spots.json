@@ -1,0 +1,57 @@
+{
+    "Items": [
+        {
+            "PK": {"S":"spot#company_1"},
+            "SK": {"S":"2020/09/10T18:50:30#spot_1"},
+            "Status": {"S":"open"},
+            "SpotId": {"S":"spot_1"},
+            "Date": {"S":"2020/09/10T18:50:30"},
+            "DurationSeconds": {"N":"360"},
+            "PriceYen": {"N":"360"},
+            "Name": {"S":"test1"},
+            "Description": {"S":"desc"},
+            "GSI1": {"S":"spot#talent_1"}
+        },
+        {
+            "PK": {"S":"spot#company_1"},
+            "SK": {"S":"2020/09/10T17:50:30#spot_2"},
+            "Status": {"S":"open"},
+            "SpotId": {"S":"spot_2"},
+            "Date": {"S":"2020/09/10T17:50:30"},
+            "DurationSeconds": {"N":"360"},
+            "PriceYen": {"N":"360"},
+            "Name": {"S":"test2"},
+            "Description": {"S":"desc"},
+            "GSI1": {"S":"spot#talent_1"}
+        },
+        {
+            "PK": {"S":"spot#company_1"},
+            "SK": {"S":"2020/09/10T19:50:30#spot_3"},
+            "Status": {"S":"open"},
+            "SpotId": {"S":"spot_3"},
+            "Date": {"S":"2020/09/10T19:50:30"},
+            "DurationSeconds": {"N":"360"},
+            "PriceYen": {"N":"360"},
+            "Name": {"S":"test3"},
+            "Description": {"S":"desc"},
+            "GSI1": {"S":"spot#talent_1"}
+        },
+        {
+            "PK": {"S":"spot#company_1"},
+            "SK": {"S":"2020/09/10T14:50:30#spot_4"},
+            "Status": {"S":"reserved"},
+            "SpotId": {"S":"spot_4"},
+            "Date": {"S":"2020/09/10T14:50:30"},
+            "DurationSeconds": {"N":"360"},
+            "PriceYen": {"N":"360"},
+            "Name": {"S":"test4"},
+            "Description": {"S":"desc"},
+            "GSI1": {"S":"spot#talent_1"},
+            "GSI2": {"S":"spot#user_1"},
+            "UserName": {"S":"test user"}
+        }
+    ],
+    "Count": 4,
+    "ScannedCount": 4,
+    "ConsumedCapacity": null  
+}

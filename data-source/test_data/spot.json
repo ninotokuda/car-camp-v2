@@ -1,0 +1,22 @@
+{
+    "Item": {
+        "Description": {
+            "S": "desc"
+        },
+        "GSI2": {
+            "S": "spot"
+        },
+        "SK": {
+            "S": "Spot#geohash123"
+        },
+        "GSI1": {
+            "S": "User#user1"
+        },
+        "PK": {
+            "S": "Spot#spot1"
+        },
+        "Name": {
+            "S": "test spot 1"
+        }
+    }
+}
