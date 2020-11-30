@@ -1,6 +1,6 @@
-# entamall
+# carcamp
 
-This is a sample template for entamall - Below is a brief explanation of what we have generated for you:
+This is a sample template for carcamp - Below is a brief explanation of what we have generated for you:
 
 ```bash
 .
