@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"log"
 	"os"
 	"strings"
 
@@ -86,10 +85,8 @@ func (z *App) handler(ctx context.Context, request events.APIGatewayProxyRequest
 			}, err
 		}
 
-		// create user from claims
-		log.Println("--- claims", claims)
+		// create user from claims and add to context
 		requestUser := RequestUser{claims.CognitoGroups, claims.SellerId, claims.Username}
-		log.Println("--", requestUser)
 		ctx = context.WithValue(ctx, RequestUserKey, requestUser)
 
 	}

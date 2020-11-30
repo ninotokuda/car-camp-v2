@@ -12,8 +12,9 @@ import (
 
 const (
 	// TestHandler
-	listCompaniesQuery = `{
-		"query":"query ListCompanies{\nlistCompanies(){Name\nDescription}}"
+	spotQuery = `{
+		"query":"query Spot($spotId: String!){spot(spotId: $spotId){Name\nDescription\nReviews{\nReviewId\nRating\nMessage\n}}}",
+		"variables": {"spotId":"spot1"}
 	}`
 
 	allTalentsQuery = `{
@@ -38,11 +39,6 @@ const (
 	userSpotsQuery = `{
 		"query":"query UserSpots($userId: String!){userSpots(userId: $userId){Name}}",
 		"variables": {"userId":"user_1"}
-	}`
-
-	spotQuery = `{
-		"query":"query Spot($pk: String!, $sk: String!){spot(pk: $pk, sk: $sk){TalentName\nStatus}}",
-		"variables": {"pk":"spot#company_1", "sk":"2020/09/10T18:50:30#spot_1"}
 	}`
 
 	createTalentMutation = `{

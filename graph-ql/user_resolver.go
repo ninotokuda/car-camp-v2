@@ -2,28 +2,28 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
 
 type UserArgs struct {
-	Pk string
-	Sk string
+	UserId string
 }
 
 func (r *Resolver) User(ctx context.Context, args UserArgs) (*UserResolver, error) {
 
 	log.Println("User")
+	pk := fmt.Sprintf("%s%s", UserPrefix, args.UserId)
 	output, err := r.Db.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(r.TableName),
 		Key: map[string]*dynamodb.AttributeValue{
 			"PK": {
-				S: aws.String("user"),
-			},
-			"SK": {
-				S: aws.String(args.Sk),
+				S: aws.String(pk),
 			},
 		},
 	})
@@ -32,47 +32,52 @@ func (r *Resolver) User(ctx context.Context, args UserArgs) (*UserResolver, erro
 		return nil, err
 	}
 
-	item := output.Item
-	user := userFromDynamoDbOutput(item)
-	userResolver := &UserResolver{s: &user}
-
+	var user User
+	err = dynamodbattribute.UnmarshalMap(output.Item, &user)
+	if err != nil {
+		return nil, err
+	}
+	userResolver := &UserResolver{user: user}
 	return userResolver, nil
 
 }
 
 type User struct {
-	PK       string
-	SK       string
-	Nickname *string
+	PK           string  `dynamodbav:"PK"`
+	SK           string  `dynamodbav:"SK"`
+	GSI1         *string `dynamodbav:"GSI1"`
+	GSI2         *string `dynamodbav:"GSI12"`
+	CreationTime string  `dynamodbav:"CreationTime"`
+	Nickname     *string `dynamodbav:"CreationTime"`
 }
 
 type UserResolver struct {
-	s *User
+	user         User
+	baseResolver *Resolver // consider using interface instead
 }
 
-func (u *UserResolver) PK(ctx context.Context) string {
-	return u.s.PK
+func (u UserResolver) UserId(ctx context.Context) string {
+	return strings.TrimPrefix(u.user.PK, UserPrefix)
 }
 
-func (u *UserResolver) SK(ctx context.Context) string {
-	return u.s.SK
+func (u UserResolver) Nickname(ctx context.Context) *string {
+	return u.user.Nickname
 }
 
-func (u *UserResolver) Nickname(ctx context.Context) *string {
-	return u.s.Nickname
+func (u UserResolver) CreationTime(ctx context.Context) string {
+	return u.user.CreationTime
 }
 
-func userFromDynamoDbOutput(item map[string]*dynamodb.AttributeValue) User {
+func (u UserResolver) Reviews(ctx context.Context) (*[]*ReviewResolver, error) {
+	userId := u.UserId(ctx)
+	reviewArgs := ReviewArgs{UserId: aws.String(userId)}
+	resolvers, err := u.baseResolver.Reviews(ctx, reviewArgs)
+	return &resolvers, err
+}
 
-	var nickname *string
-	if v, ok := item["Nickname"]; ok {
-		nickname = v.S
-	}
-
-	user := User{
-		PK:       *item["PK"].S,
-		SK:       *item["SK"].S,
-		Nickname: nickname,
-	}
-	return user
+func (u UserResolver) CreatedSpots(ctx context.Context) (*[]*SpotResolver, error) {
+	userId := u.UserId(ctx)
+	spotArgs := SpotArgs{CreatorId: userId}
+	resolvers, err := u.baseResolver.SpotsByCreator(ctx, spotArgs)
+	return &resolvers, err
 }

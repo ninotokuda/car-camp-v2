@@ -6,14 +6,6 @@ const (
 	// keys
 	RequestUserKey = "request_user"
 
-	// db keys
-	pkKey          = "PK"
-	skKey          = "SK"
-	gsi1Key        = "GSI1"
-	gsi2Key        = "GSI2"
-	nameKey        = "Name"
-	DescriptionKey = "Description"
-
 	// env vars
 	TableNameEvn  = "DynamoTableName"
 	BucketNameEnv = "S3BucketName"
@@ -26,4 +18,30 @@ const (
 	ErrorUserIsNotAuthenticated    = "ErrorUserIsNotAuthenticated"
 	ErrorUserDoesNotHaveSellerAuth = "ErrorUserDoesNotHaveSellerAuth"
 	ErrorSpotIsAlreadyReserved     = "ErrorSpotIsAlreadyReserved"
+
+	// prefixes
+	SpotPrefix   = "Spot#"
+	UserPrefix   = "User#"
+	ReviewPrefix = "Review#"
+
+	// keys
+	PKKey           = "PK"
+	SKKey           = "SK"
+	GSI1Key         = "GSI1"
+	GSI2Key         = "GSI2"
+	SpotTypeKey     = "SpotType"
+	LatitudeKey     = "Latitude"
+	LongitudeKey    = "Longitude"
+	CreatorIdKey    = "CreatorId"
+	CreationTimeKey = "CreationTime"
+	NameKey         = "Name"
+	DescriptionKey  = "Description"
+	AddressKey      = "Address"
+	CodeKey         = "Code"
+	PrefectureKey   = "Prefecture"
+	CityKey         = "City"
+	HomePageUrlsKey = "HomePageUrls"
+	TagsKey         = "Tags"
+	MessageKey      = "Message"
+	RatingKey       = "Rating"
 )

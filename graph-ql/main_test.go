@@ -23,103 +23,12 @@ func TestHandler(t *testing.T) {
 		errorString     string
 	}{
 		{
-			"list companies",
-			listCompaniesQuery,
-			"test_data/companies.json",
-			"",
-			`{"data":{"listCompanies":[{"Name":"test company 1","Description":"desc"},{"Name":"test company 2","Description":"desc"}]}}`,
-			adminUserClaims,
-			"",
-		},
-		{
-			"all talents",
-			allTalentsQuery,
-			"test_data/talents.json",
-			"",
-			`{"data":{"allTalents":[{"PK":"talent#company_1","SK":"talent_1","Name":"talent 1","Description":"desc"},{"PK":"talent#company_1","SK":"talent_2","Name":"talent 2","Description":"desc"}]}}`,
-			adminUserClaims,
-			"",
-		},
-		{
-			"company talents",
-			campanyTalentsQuery,
-			"test_data/talents.json",
-			"",
-			`{"data":{"companyTalents":[{"PK":"talent#company_1","SK":"talent_1","Name":"talent 1","Description":"desc"},{"PK":"talent#company_1","SK":"talent_2","Name":"talent 2","Description":"desc"}]}}`,
-			sellerUser1Claims,
-			"",
-		},
-		{
-			"open spots",
-			openTalentSpotsQuery,
-			"test_data/spots.json",
-			"",
-			`{"data":{"openTalentSpots":[{"Name":"test1"},{"Name":"test2"},{"Name":"test3"},{"Name":"test4"}]}}`,
-			nil,
-			"",
-		},
-		{
-			"company spots",
-			companySpotsQuery,
-			"test_data/spots.json",
-			"",
-			`{"data":{"companySpots":[{"Name":"test1"},{"Name":"test2"},{"Name":"test3"},{"Name":"test4"}]}}`,
-			sellerUser1Claims,
-			"",
-		},
-		{
-			"company spots wrong seller",
-			companySpotsQuery,
-			"test_data/spots.json",
-			"",
-			`{"errors":[{"message":"ErrorUserDoesNotHaveSellerAuth","path":["companySpots"]}],"data":null}`,
-			sellerUser2Claims,
-			"",
-		},
-		{
-			"company spots non seller",
-			companySpotsQuery,
-			"test_data/spots.json",
-			"",
-			`{"errors":[{"message":"ErrorUserDoesNotHaveSellerAuth","path":["companySpots"]}],"data":null}`,
-			user1Claims,
-			"",
-		},
-		{
-			"company spots unauthenticated",
-			companySpotsQuery,
-			"test_data/spots.json",
-			"",
-			`{"errors":[{"message":"ErrorUserIsNotAuthenticated","path":["companySpots"]}],"data":null}`,
-			nil,
-			"",
-		},
-		{
-			"user spots",
-			userSpotsQuery,
-			"test_data/spots.json",
-			"",
-			`{"data":{"userSpots":[{"Name":"test1"},{"Name":"test2"},{"Name":"test3"},{"Name":"test4"}]}}`,
-			user1Claims,
-			"",
-		},
-		{
-			"spot Detail",
+			"spot",
 			spotQuery,
-			"",
+			"test_data/reviews.json",
 			"test_data/spot.json",
-			`{"data":{"spot":{"TalentName":"new 1","Status":"reserved"}}}`,
-			user1Claims,
-			"",
-		},
-
-		{
-			"user Detail",
-			userQuery,
-			"",
-			"test_data/user.json",
-			`{"data":{"user":{"Nickname":"test user 111"}}}`,
-			user1Claims,
+			`{"data":{"spot":{"Name":"test spot 1","Description":"desc","Reviews":[{"ReviewId":"review1","Rating":4,"Message":"very good"},{"ReviewId":"review2","Rating":5,"Message":"very good yay"}]}}}`,
+			adminUserClaims,
 			"",
 		},
 	}
@@ -127,7 +36,6 @@ func TestHandler(t *testing.T) {
 	for _, tc := range testCases {
 
 		t.Run(tc.name, func(t *testing.T) {
-
 			app := createTestApp(tc.queryResponse, tc.getItemResponse)
 			app.awsTokenValidator = &mockAwsTokenValidator{
 				ValidateIdTokenFunc: func(idToken string) (*AWSCognitoClaims, error) {

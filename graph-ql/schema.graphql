@@ -4,62 +4,71 @@ schema {
 }
 
 type Query {
-  listCompanies(): [Company]!
-  allTalents(): [Talent]!
-  talent(pk: String!, sk: String!): Talent
-  companyTalents(pk: String!): [Talent]!
-  openTalentSpots(talentId: String!, startDate: String, endDate: String): [Spot]!
-  companySpots(companyId: String!, status: String, startDate: String, endDate: String): [Spot]!
-  userSpots(userId: String!, startDate: String, endDate: String, status: String): [Spot]!
-  spot(pk: String!, sk: String!): Spot
-  user(sk: String!): User
+  spot(spotId: String!): Spot!
+  spotsByGeohash(geohash: String!, spotTypes: [String]): [Spot]!
+  SpotsByCreator(creatorId: String!, spotTypes: [String]): [Spot]!
+  reviews(spotId: String, userId: String, lastReviewId: String): [Review]!
+  user(userId: String!): User!
 }
-
 
 type Mutation {
-    createTalent(name: String!, description: String!, profileImage: String): Talent!
-    updateTalent(pk: String!, sk: String!, name: String!, description: String! profileImage: String): Talent!
-    createSpot(talentId: String!, companyId: String!, date: String!, durationSeconds: Int!, priceYen: Int!, talentName: String, name: String, description: String): Spot!
-    updateSpot(pk: String!, sk: String!, durationSeconds: Int!, priceYen: Int!, name: String, description: String): Spot!
-    reserveSpot(pk: String!, sk: String!, userId: String!, userName: String): Spot!
-}
-
-
-type User {
-  PK: String! # user
-  SK: String! # user_<user_id>
-  Nickname: String
-}
-
-type Company {
-  PK: String! # company
-  SK: String! # <company_id>
-  CompanyId: String!
-  Name: String!
-  Description: String
-}
-
-type Talent {
-    PK: String! # talent#<company_id>
-    SK: String! # <talent_id>
-    Name: String!
-    Description: String
-    GSI1: String # talent
-    ProfileImageUrl: String
+  # createSpot(creatorUserId: String, goehash: String, spotType: String, latitude: Float, longitude: Float, name: String, address: String, code: String, prefecture: String, city: String, homePageUrls: [String], tags: [String]): Spot!
+  createReview(spotId: String!, userId: String, message: String, rating: Int): Review!
+  # createSpotImage(spotId: String!, userId: String, image: String): SpotImage!
 }
 
 type Spot {
-  PK: String! # spot#<company_id>
-  SK: String! # <date_time>#<spot_id>
   SpotId: String!
-  Status: String!
-  Date: String!
-  DurationSeconds: Int!
-  PriceYen: Int!
+  Geohash: String!
+  SpotType: String!
+  Latitude: Float!
+  Longitude: Float!
+  CreationTime: String!
+  Reviews: [Review]
+  SpotDistances: [SpotDistance]
+  Images: [SpotImage]
+  CreatorId: String
+  Creator: User
   Name: String
-  TalentName: String
-  UserName: String
   Description: String
-  GSI1: String # spot#<talent_id>
-  GSI2: String # spot#<user_id>
+  Address: String
+  Code: String
+  Prefecture: String
+  City: String
+  HomePageUrls: [String]
+  Tags: [String]
+}
+
+type Review {
+  ReviewId: String!
+  SpotId: String!
+  CreationTime: String!
+  UserId: String
+  User: User
+  Rating: Int
+  Message: String
+}
+
+type SpotDistance {
+  SpotId: String!
+  DestinationSpotId: String!
+  CreationTime: String!
+  DistanceMeters: Int
+  DistanceSeconds: Int
+}
+
+type SpotImage {
+  SpotImageId: String!
+  SpotId: String!
+  ImageUrl: String!
+  UserId: String
+  CreationTime: String!
+}
+
+type User {
+  UserId: String!
+  Nickname: String
+  CreationTime: String!
+  Reviews: [Review]
+  CreatedSpots: [Spot]
 }
