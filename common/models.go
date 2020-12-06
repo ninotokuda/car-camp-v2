@@ -10,20 +10,20 @@ import (
 type Spot struct {
 	PK           string    `dynamodbav:"PK"`
 	SK           string    `dynamodbav:"SK"`
-	GSI1         *string   `dynamodbav:"GSI1"`
-	GSI2         *string   `dynamodbav:"GSI12"`
+	GSI1         *string   `dynamodbav:"GSI1,omitempty"`
+	GSI2         *string   `dynamodbav:"GSI12,omitempty"`
 	CreationTime string    `dynamodbav:"CreationTime"`
 	SpotType     string    `dynamodbav:"SpotType"`
 	Latitude     float64   `dynamodbav:"Latitude"`
 	Longitude    float64   `dynamodbav:"Longitude"`
-	Name         *string   `dynamodbav:"Name"`
-	Description  *string   `dynamodbav:"Description"`
-	Address      *string   `dynamodbav:"Address"`
-	Code         *string   `dynamodbav:"Code"`
-	Prefecture   *string   `dynamodbav:"Prefecture"`
-	City         *string   `dynamodbav:"City"`
-	HomePageUrls []*string `dynamodbav:"HomePageUrls"`
-	Tags         []*string `dynamodbav:"Tags"`
+	Name         *string   `dynamodbav:"Name,omitempty"`
+	Description  *string   `dynamodbav:"Description,omitempty"`
+	Address      *string   `dynamodbav:"Address,omitempty"`
+	Code         *string   `dynamodbav:"Code,omitempty"`
+	Prefecture   *string   `dynamodbav:"Prefecture,omitempty"`
+	City         *string   `dynamodbav:"City,omitempty"`
+	HomePageUrls []*string `dynamodbav:"HomePageUrls,omitempty"`
+	Tags         []*string `dynamodbav:"Tags,omitempty"`
 }
 
 func (s Spot) SpotId() string {
@@ -37,7 +37,7 @@ func (s Spot) Geohash() string {
 type SpotDistance struct {
 	PK              string  `dynamodbav:"PK"`
 	SK              string  `dynamodbav:"SK"`
-	GSI1            *string `dynamodbav:"GSI1"`
+	GSI1            *string `dynamodbav:"GSI1,omitempty"`
 	DistanceSeconds float64 `dynamodbav:"DistanceSeconds"`
 	DistanceMeters  float64 `dynamodbav:"DistanceMeters"`
 }
