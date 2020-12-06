@@ -51,7 +51,7 @@ Resources:
       Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
         Variables:
           DynamoTableName: !Ref DynamoDBTable
-          S3BucketName: !Ref DataBucket
+          S3DataBucketName: !Ref DataBucket
   
   DynamoDBTable:
     Type: AWS::DynamoDB::Table
@@ -60,8 +60,6 @@ Resources:
         - AttributeName: PK
           AttributeType: S
         - AttributeName: SK
-          AttributeType: S
-        - AttributeName: Date
           AttributeType: S
         - AttributeName: GSI1
           AttributeType: S
@@ -233,7 +231,4 @@ Outputs:
   FrontendBucket:
     Description: "S3 bucket hosting the frontend app"
     Value: !GetAtt FrontendBucket.WebsiteURL
-  WebSocketURI:
-    Description: "The WSS Protocol URI to connect to"
-    Value: !Join [ '', [ 'wss://', !Ref WSApi, '.execute-api.',!Ref 'AWS::Region','.amazonaws.com/',!Ref 'WSStage'] ]
   

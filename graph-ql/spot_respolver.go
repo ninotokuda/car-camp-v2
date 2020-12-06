@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/ninotokuda/carcamp_v2/common"
 )
 
 type SpotArgs struct {
@@ -46,7 +47,7 @@ func (r *Resolver) Spot(ctx context.Context, args SpotArgs) (*SpotResolver, erro
 		return nil, err
 	}
 
-	var spot Spot
+	var spot common.Spot
 	err = dynamodbattribute.UnmarshalMap(output.Item, &spot)
 	if err != nil {
 		return nil, err
@@ -94,7 +95,7 @@ func (r *Resolver) SpotsByGeohash(ctx context.Context, args SpotArgs) ([]*SpotRe
 	spotResolvers := make([]*SpotResolver, len(output.Items))
 	for index := range output.Items {
 		item := output.Items[index]
-		var spot Spot
+		var spot common.Spot
 		err := dynamodbattribute.UnmarshalMap(item, &spot)
 		if err != nil {
 			return nil, err
@@ -142,7 +143,7 @@ func (r *Resolver) SpotsByCreator(ctx context.Context, args SpotArgs) ([]*SpotRe
 	spotResolvers := make([]*SpotResolver, len(output.Items))
 	for index := range output.Items {
 		item := output.Items[index]
-		var spot Spot
+		var spot common.Spot
 		err := dynamodbattribute.UnmarshalMap(item, &spot)
 		if err != nil {
 			return nil, err
@@ -155,27 +156,8 @@ func (r *Resolver) SpotsByCreator(ctx context.Context, args SpotArgs) ([]*SpotRe
 
 }
 
-type Spot struct {
-	PK           string    `dynamodbav:"PK"`
-	SK           string    `dynamodbav:"SK"`
-	GSI1         *string   `dynamodbav:"GSI1"`
-	GSI2         *string   `dynamodbav:"GSI12"`
-	CreationTime string    `dynamodbav:"CreationTime"`
-	SpotType     string    `dynamodbav:"SpotType"`
-	Latitude     float64   `dynamodbav:"Latitude"`
-	Longitude    float64   `dynamodbav:"Longitude"`
-	Name         *string   `dynamodbav:"Name"`
-	Description  *string   `dynamodbav:"Description"`
-	Address      *string   `dynamodbav:"Address"`
-	Code         *string   `dynamodbav:"Code"`
-	Prefecture   *string   `dynamodbav:"Prefecture"`
-	City         *string   `dynamodbav:"City"`
-	HomePageUrls []*string `dynamodbav:"HomePageUrls"`
-	Tags         []*string `dynamodbav:"Tags"`
-}
-
 type SpotResolver struct {
-	spot         *Spot
+	spot         *common.Spot
 	baseResolver *Resolver // consider using interface instead
 }
 
