@@ -12,6 +12,7 @@ require (
 	github.com/lestrrat-go/jwx v1.0.5
 	github.com/mmcloughlin/geohash v0.10.0
 	github.com/opentracing/opentracing-go v1.1.0
+	github.com/prometheus/common v0.7.0
 	github.com/satori/go.uuid v1.2.0
 	github.com/stretchr/testify v1.6.1
 	go.uber.org/zap v1.16.0

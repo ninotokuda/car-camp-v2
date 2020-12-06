@@ -15,8 +15,9 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
+	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
 	"github.com/ninotokuda/carcamp_v2/common"
-	"github.com/opentracing/opentracing-go/log"
+	"go.uber.org/zap"
 )
 
 var (
@@ -62,6 +63,9 @@ func NewApp() *App {
 
 func (z *App) handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
+	log := ctxzap.Extract(ctx)
+	log.Info("Handler")
+
 	// load data
 	csvSpots, err := z.loadCSVData(z.dataBucketName, "stations.json")
 	if err != nil {
@@ -75,14 +79,14 @@ func (z *App) handler(ctx context.Context, request events.APIGatewayProxyRequest
 		// upload to dynamodb
 		uploadErr := common.UploadSpot(ctx, spot, z.db, z.tableName)
 		if uploadErr != nil {
-			log.Error(uploadErr)
+			log.Error("Failed to upload spot", zap.Error(uploadErr))
 			continue
 		}
 
 		// upload to mapbox
 		mapboxErr := z.mapboxClient.AddFeature(ctx, spot)
 		if mapboxErr != nil {
-			log.Error(mapboxErr)
+			log.Error("Failed to upload Feature", zap.Error(mapboxErr))
 		}
 		break // test with one
 	}
@@ -161,7 +165,7 @@ func (z *App) handler(ctx context.Context, request events.APIGatewayProxyRequest
 					spotDistance := common.NewSpotDistance(origin, destination, distanceSeconds, distanceMeters)
 					err := common.AddSpotDistance(ctx, spotDistance, z.db, z.tableName)
 					if err != nil {
-						log.Error(err)
+						log.Error("Failed to add SpotDistance", zap.Error(err))
 					}
 				}
 			}

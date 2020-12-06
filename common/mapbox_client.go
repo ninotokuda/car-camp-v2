@@ -57,6 +57,9 @@ type AddFeatureRequest struct {
 
 func (z *MapboxClientImpl) AddFeature(ctx context.Context, spot Spot) error {
 
+	log := ctxzap.Extract(ctx)
+	log.Info("AddFeature")
+	log.Info("FeatureId", zap.String("spot_id", spot.SpotId()))
 	spotId := spot.SpotId()
 	featureRequest := AddFeatureRequest{
 		Id:   spotId,
