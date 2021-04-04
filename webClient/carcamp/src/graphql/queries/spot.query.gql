@@ -1,0 +1,20 @@
+query Spot($spotId: String!){
+	spot(spotId: $spotId){
+		SpotId
+		Geohash
+		SpotType
+		Latitude
+		Longitude
+		Reviews
+		SpotDistances
+		Images
+		Name
+		Description
+    Address
+    Code
+    Prefecture
+    City
+    HomePageUrls
+    Tags
+	}
+}
