@@ -56,14 +56,17 @@ func TestLoadSpots(t *testing.T) {
 			require.Equal(t, "spots", *spot1.GSI2)
 			require.Equal(t, "RoadSideStation", spot1.SpotType)
 
-			require.Equal(t, 3, len(spot1.HomePageUrls))
-			pages := []string{*spot1.HomePageUrls[0], *spot1.HomePageUrls[1], *spot1.HomePageUrls[2]}
+			pageUrls := *spot1.HomePageUrls
+			require.Equal(t, 3, len(pageUrls))
+
+			pages := []string{pageUrls[0], pageUrls[1], pageUrls[2]}
 			p := []string{"https://www.michi-no-eki.jp/stations/view/1", "http://www.hokkaido-michinoeki.jp/michinoeki/172/", "http://www.city.mikasa.hokkaido.jp/hotnews/detail/00000036.html"}
 			require.Equal(t, p, pages)
-			require.Equal(t, 6, len(spot1.Tags))
-			tags := []string{*spot1.Tags[0], *spot1.Tags[1], *spot1.Tags[2], *spot1.Tags[3], *spot1.Tags[4], *spot1.Tags[5]}
+			tags := *spot1.Tags
+			require.Equal(t, 6, len(tags))
+			stags := []string{tags[0], tags[1], tags[2], tags[3], tags[4], tags[5]}
 			ts := []string{"Atm", "BabyBed", "Restaurant", "TouristInformation", "HandicappedToilet", "Shop"}
-			require.Equal(t, ts, tags)
+			require.Equal(t, ts, stags)
 
 		})
 	}
@@ -106,6 +109,7 @@ func TestHandler(t *testing.T) {
 			addedSpotDistances := []map[string]*dynamodb.AttributeValue{}
 			dbClient := &mockDbClient{
 				PutItemFunc: func(in *dynamodb.PutItemInput) (*dynamodb.PutItemOutput, error) {
+					fmt.Println("---", in.ConditionExpression)
 					if in.ConditionExpression != nil {
 						addedSpots = append(addedSpots, in.Item)
 						spotUploadedCount++
@@ -116,23 +120,22 @@ func TestHandler(t *testing.T) {
 					return nil, nil
 				},
 				QueryFunc: func(in *dynamodb.QueryInput) (*dynamodb.QueryOutput, error) {
-
-					if strings.Contains(*in.KeyConditionExpression, "#pk = :pk AND #sk IN(") {
-						spotDistances := []map[string]*dynamodb.AttributeValue{}
-						for i := range addedSpotDistances {
-							sd := addedSpotDistances[i]
-							if *sd["PK"].S == *in.ExpressionAttributeValues[":pk"].S {
-								spotDistances = append(spotDistances, sd)
-							}
-						}
+					if in.IndexName != nil {
 						return &dynamodb.QueryOutput{
-							Items: spotDistances,
+							Items: addedSpots,
 						}, nil
 					}
-
+					spotDistances := []map[string]*dynamodb.AttributeValue{}
+					for i := range addedSpotDistances {
+						sd := addedSpotDistances[i]
+						if *sd["PK"].S == *in.ExpressionAttributeValues[":pk"].S {
+							spotDistances = append(spotDistances, sd)
+						}
+					}
 					return &dynamodb.QueryOutput{
-						Items: addedSpots,
+						Items: spotDistances,
 					}, nil
+
 				},
 			}
 

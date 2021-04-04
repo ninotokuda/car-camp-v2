@@ -20,9 +20,14 @@ const (
 	ErrorSpotIsAlreadyReserved     = "ErrorSpotIsAlreadyReserved"
 
 	// prefixes
-	SpotPrefix   = "Spot#"
-	UserPrefix   = "User#"
-	ReviewPrefix = "Review#"
+	SpotPrefix    = "Spot#"
+	UserPrefix    = "User#"
+	ReviewPrefix  = "Review#"
+	GeohashPrefix = "Geohash#"
+
+	// queryNames
+	SpotQueryName          = "spots"
+	SpotDistancesQueryName = "SpotDistances"
 
 	// keys
 	PKKey           = "PK"

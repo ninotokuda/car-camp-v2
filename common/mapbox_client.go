@@ -7,11 +7,9 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
-
-	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
-	"go.uber.org/zap"
 )
 
 type MapboxClient interface {
@@ -57,9 +55,8 @@ type AddFeatureRequest struct {
 
 func (z *MapboxClientImpl) AddFeature(ctx context.Context, spot Spot) error {
 
-	log := ctxzap.Extract(ctx)
-	log.Info("AddFeature")
-	log.Info("FeatureId", zap.String("spot_id", spot.SpotId()))
+	log.Println("AddFeature")
+	log.Println("FeatureId: ", spot.SpotId())
 	spotId := spot.SpotId()
 	featureRequest := AddFeatureRequest{
 		Id:   spotId,
@@ -71,6 +68,7 @@ func (z *MapboxClientImpl) AddFeature(ctx context.Context, spot Spot) error {
 		Properties: map[string]string{
 			"Name":     *spot.Name,
 			"SpotType": spot.SpotType,
+			"SpotId":   spot.SpotId(),
 		},
 	}
 
@@ -123,25 +121,26 @@ func (z *MapboxClientImpl) LoadDistances(ctx context.Context, origin Spot, desti
 }
 
 func (z *MapboxClientImpl) executeRequest(ctx context.Context, req *http.Request) ([]byte, error) {
-	log := ctxzap.Extract(ctx)
-	log.Info("executeRequest")
+	log.Println("executeRequest")
 	req.Header.Add("Content-Type", "application/json")
+	log.Println("request url", req.URL)
 
 	response, err := z.Client.Do(req.WithContext(ctx))
 	if err != nil {
-		log.Error("Error making request", zap.Error(err))
+		log.Println("Error making request", err.Error())
 		return nil, err
 	}
 	defer response.Body.Close()
 	var bytes []byte
 	bytes, err = ioutil.ReadAll(response.Body)
 	if err != nil {
-		log.Error("Error reading Response body", zap.Error(err))
+		log.Println("Error reading Response body:", err)
 		return nil, err
 	}
 	if response.StatusCode < 200 || response.StatusCode > 299 {
+		log.Println("Error in status code", response.StatusCode, string(bytes))
 		return nil, errors.New("Non success status code")
 	}
-	log.Info("response body")
+	log.Println("response body", string(bytes))
 	return bytes, nil
 }

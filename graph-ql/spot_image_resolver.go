@@ -11,7 +11,7 @@ type SpotImage struct {
 	SpotId       string
 	ImageUrl     string
 	UserId       *string
-	CreationTime *string
+	CreationTime string
 }
 
 type SpotImageResolver struct {
@@ -34,6 +34,6 @@ func (u SpotImageResolver) UserId(ctx context.Context) *string {
 	return u.spotImage.UserId
 }
 
-func (u SpotImageResolver) CreationTime(ctx context.Context) *string {
+func (u SpotImageResolver) CreationTime(ctx context.Context) string {
 	return u.spotImage.CreationTime
 }

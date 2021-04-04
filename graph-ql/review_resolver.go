@@ -132,7 +132,7 @@ type Review struct {
 	PK           string  `dynamodbav:"PK"`
 	SK           string  `dynamodbav:"SK"`
 	GSI1         *string `dynamodbav:"GSI1"`
-	GSI2         *string `dynamodbav:"GSI12"`
+	GSI2         *string `dynamodbav:"GSI2"`
 	CreationTime string  `dynamodbav:"CreationTime"`
 	Rating       *int32  `dynamodbav:"Rating"`
 	Message      *string `dynamodbav:"Message"`

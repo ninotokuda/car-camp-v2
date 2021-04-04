@@ -12,7 +12,7 @@ type Query {
 }
 
 type Mutation {
-  # createSpot(creatorUserId: String, goehash: String, spotType: String, latitude: Float, longitude: Float, name: String, address: String, code: String, prefecture: String, city: String, homePageUrls: [String], tags: [String]): Spot!
+  createSpot(creatorUserId: String!, goehash: String!, spotType: String!, latitude: Float!, longitude: Float!, name: String, address: String, code: String, prefecture: String, city: String, homePageUrls: [String!], tags: [String!]): Spot!
   createReview(spotId: String!, userId: String, message: String, rating: Int): Review!
   # createSpotImage(spotId: String!, userId: String, image: String): SpotImage!
 }
@@ -35,8 +35,9 @@ type Spot {
   Code: String
   Prefecture: String
   City: String
-  HomePageUrls: [String]
-  Tags: [String]
+  HomePageUrls: [String!]
+  Tags: [String!]
+  DefaultImageUrl: String
 }
 
 type Review {
@@ -53,8 +54,12 @@ type SpotDistance {
   SpotId: String!
   DestinationSpotId: String!
   CreationTime: String!
-  DistanceMeters: Int
-  DistanceSeconds: Int
+  DistanceMeters: Float
+  DistanceSeconds: Float
+  DestinationName: String
+  DestinationSpotType: String
+  DestinationImageUrl: String
+  DestinationDescription: String
 }
 
 type SpotImage {

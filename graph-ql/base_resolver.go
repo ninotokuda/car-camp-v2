@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
+	"github.com/ninotokuda/carcamp_v2/common"
 )
 
 type QueryRequest struct {
@@ -12,8 +13,9 @@ type QueryRequest struct {
 }
 
 type Resolver struct {
-	S3Client   s3iface.S3API
-	BucketName string
-	Db         dynamodbiface.DynamoDBAPI
-	TableName  string
+	S3Client     s3iface.S3API
+	BucketName   string
+	Db           dynamodbiface.DynamoDBAPI
+	TableName    string
+	MapboxClient common.MapboxClient
 }

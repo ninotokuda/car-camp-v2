@@ -14,6 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/graph-gophers/graphql-go"
+	"github.com/ninotokuda/carcamp_v2/common"
 )
 
 var (
@@ -45,11 +46,17 @@ func NewApp() *App {
 	tableName := os.Getenv(TableNameEvn)
 	s3Client := s3.New(mySession)
 	bucketName := os.Getenv(BucketNameEnv)
+	mapboxClient := common.NewMapboxClient(common.MapboxConfig{
+		AccessToken: "sk.eyJ1Ijoibmlub3Rva3VkYSIsImEiOiJja2lkNml2Y24wNmthMnlydzV4NHY4NWZ3In0.rUAecoTts1ppwey4sDaGGA",
+		DataSetId:   "ckid44kon1tbn2bsyjh5snfbk",
+		BaseUrl:     "https://api.mapbox.com",
+	})
 	resolver := Resolver{
-		S3Client:   s3Client,
-		BucketName: bucketName,
-		Db:         db,
-		TableName:  tableName,
+		S3Client:     s3Client,
+		BucketName:   bucketName,
+		Db:           db,
+		TableName:    tableName,
+		MapboxClient: mapboxClient,
 	}
 	schema := graphql.MustParseSchema(schemaString, &resolver, graphql.UseStringDescriptions())
 

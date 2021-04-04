@@ -110,80 +110,80 @@ func FeatureToSpot(in Feature) common.Spot {
 	handicappedToilet := in.Properties["P35_027"].(float64)
 	shop := in.Properties["P35_028"].(float64)
 
-	homePages := []*string{}
+	homePages := []string{}
 	if homePage1 != "" {
-		homePages = append(homePages, aws.String(homePage1))
+		homePages = append(homePages, homePage1)
 	}
 
 	if homePage2 != "" {
-		homePages = append(homePages, aws.String(homePage2))
+		homePages = append(homePages, homePage2)
 	}
 
 	if homePage3 != "" {
-		homePages = append(homePages, aws.String(homePage3))
+		homePages = append(homePages, homePage3)
 	}
 
 	if homePage4 != "" {
-		homePages = append(homePages, aws.String(homePage4))
+		homePages = append(homePages, homePage4)
 	}
 
-	tags := []*string{}
+	tags := []string{}
 	if atm == 1.0 {
-		tags = append(tags, aws.String("Atm"))
+		tags = append(tags, "Atm")
 	}
 	if babyBed == 1.0 {
-		tags = append(tags, aws.String("BabyBed"))
+		tags = append(tags, "BabyBed")
 	}
 	if restaurant == 1.0 {
-		tags = append(tags, aws.String("Restaurant"))
+		tags = append(tags, "Restaurant")
 	}
 	if cafe == 1.0 {
-		tags = append(tags, aws.String("Cafe"))
+		tags = append(tags, "Cafe")
 	}
 	if lightMeal == 1.0 {
-		tags = append(tags, aws.String("LightMeal"))
+		tags = append(tags, "LightMeal")
 	}
 	if hotel == 1.0 {
-		tags = append(tags, aws.String("Hotel"))
+		tags = append(tags, "Hotel")
 	}
 	if hotSpring == 1.0 {
-		tags = append(tags, aws.String("HotSpring"))
+		tags = append(tags, "HotSpring")
 	}
 	if camping == 1.0 {
-		tags = append(tags, aws.String("Camping"))
+		tags = append(tags, "Camping")
 	}
 	if park == 1.0 {
-		tags = append(tags, aws.String("Park"))
+		tags = append(tags, "Park")
 	}
 	if observatory == 1.0 {
-		tags = append(tags, aws.String("Observatory"))
+		tags = append(tags, "Observatory")
 	}
 	if museum == 1.0 {
-		tags = append(tags, aws.String("Museum"))
+		tags = append(tags, "Museum")
 	}
 	if gasStand == 1.0 {
-		tags = append(tags, aws.String("GasStand"))
+		tags = append(tags, "GasStand")
 	}
 	if evCharging == 1.0 {
-		tags = append(tags, aws.String("EvCharging"))
+		tags = append(tags, "EvCharging")
 	}
 	if wifi == 1.0 {
-		tags = append(tags, aws.String("Wifi"))
+		tags = append(tags, "Wifi")
 	}
 	if shower == 1.0 {
-		tags = append(tags, aws.String("Shower"))
+		tags = append(tags, "Shower")
 	}
 	if experienceFacility == 1.0 {
-		tags = append(tags, aws.String("ExperienceFacility"))
+		tags = append(tags, "ExperienceFacility")
 	}
 	if touristInformation == 1.0 {
-		tags = append(tags, aws.String("TouristInformation"))
+		tags = append(tags, "TouristInformation")
 	}
 	if handicappedToilet == 1.0 {
-		tags = append(tags, aws.String("HandicappedToilet"))
+		tags = append(tags, "HandicappedToilet")
 	}
 	if shop == 1.0 {
-		tags = append(tags, aws.String("Shop"))
+		tags = append(tags, "Shop")
 	}
 
 	return common.Spot{
@@ -196,8 +196,8 @@ func FeatureToSpot(in Feature) common.Spot {
 		City:         aws.String(city),
 		Name:         aws.String(name),
 		Code:         aws.String(code),
-		HomePageUrls: homePages,
-		Tags:         tags,
+		HomePageUrls: &homePages,
+		Tags:         &tags,
 		Address:      aws.String(address),
 		SpotType:     spotType,
 		CreationTime: creationTime,
